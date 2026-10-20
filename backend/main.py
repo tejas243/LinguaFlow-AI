@@ -10,6 +10,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from google import genai
 
+# --------------------------------------------------
+# Logging and environment configuration
+# --------------------------------------------------
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("linguaflow")
 
@@ -17,21 +21,36 @@ load_dotenv(Path(__file__).with_name(".env"))
 
 MODEL_NAME = "gemini-3.8-flash"
 
+# Your Chrome extension ID
+CHROME_EXTENSION_ORIGIN = (
+    "chrome-extension://ealkgdjdgpamlcfbegibhbponbhimefce"
+)
+
+# --------------------------------------------------
+# FastAPI application
+# --------------------------------------------------
+
 app = FastAPI(
     title="LinguaFlow AI API",
     description="AI writing assistant backend for LinguaFlow AI.",
-    version="0.2.0",
+    version="0.3.0",
 )
+
+# --------------------------------------------------
+# CORS configuration
+# Allows requests from your Chrome extension.
+# --------------------------------------------------
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "chrome-extension://ealkgdjdgpamlcfbegibhbponbhimefce"
-    ],
-    allow_methods=["GET", "POST"],
+    allow_origins=[CHROME_EXTENSION_ORIGIN],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type"],
 )
 
+# --------------------------------------------------
+# Request and response models
+# --------------------------------------------------
 
 class ConvertRequest(BaseModel):
     text: str = Field(min_length=1, max_length=3000)
@@ -43,6 +62,10 @@ class ConvertResponse(BaseModel):
     mode: str
     result: str
 
+
+# --------------------------------------------------
+# API endpoints
+# --------------------------------------------------
 
 @app.get("/")
 def home():
@@ -75,7 +98,7 @@ def convert_message(request: ConvertRequest):
     if not api_key or api_key == "PASTE_YOUR_KEY_HERE":
         raise HTTPException(
             status_code=503,
-            detail="AI service is not configured. Check backend/.env.",
+            detail="AI service is not configured. Check the GEMINI_API_KEY environment variable.",
         )
 
     instructions = {
@@ -111,6 +134,7 @@ Message:
 
     try:
         client = genai.Client(api_key=api_key)
+
         response = client.models.generate_content(
             model=MODEL_NAME,
             contents=prompt,
@@ -132,12 +156,14 @@ Message:
 
     except HTTPException:
         raise
+
     except Exception:
         logger.exception("Gemini conversion request failed")
+
         raise HTTPException(
             status_code=502,
             detail=(
-                "AI conversion failed. Check the backend terminal "
+                "AI conversion failed. Check the server logs "
                 "for details and try again."
             ),
         )

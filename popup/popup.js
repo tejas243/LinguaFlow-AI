@@ -9,7 +9,7 @@ const mode = document.getElementById("mode");
 const aiStatus = document.getElementById("aiStatus");
 
 const initialResult = "Your converted message will appear here.";
-const API_URL = "http://127.0.0.1:8000/api/convert";
+const API_URL = "https://linguaflow-ai-my62.onrender.com/api/convert";
 
 function updateCharacterCount() {
   const count = sourceText.value.length;
