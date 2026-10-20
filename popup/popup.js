@@ -8,6 +8,7 @@ const clearBtn = document.getElementById("clearBtn");
 const mode = document.getElementById("mode");
 
 const initialResult = "Your converted message will appear here.";
+const API_URL = "http://127.0.0.1:8000/api/convert";
 
 function updateCharacterCount() {
   const count = sourceText.value.length;
@@ -17,7 +18,7 @@ function updateCharacterCount() {
 
 sourceText.addEventListener("input", updateCharacterCount);
 
-convertBtn.addEventListener("click", () => {
+convertBtn.addEventListener("click", async () => {
   const text = sourceText.value.trim();
 
   if (!text) {
@@ -26,26 +27,39 @@ convertBtn.addEventListener("click", () => {
     return;
   }
 
-  let modeDescription;
+  convertBtn.disabled = true;
+  convertBtn.textContent = "Connecting to backend...";
+  result.textContent = "Sending your message to LinguaFlow AI...";
 
-  switch (mode.value) {
-    case "professional":
-      modeDescription = "rewritten professionally";
-      break;
-    case "casual":
-      modeDescription = "rewritten in a friendly, casual style";
-      break;
-    case "grammar":
-      modeDescription = "checked and corrected for grammar";
-      break;
-    default:
-      modeDescription = "processed";
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        text: text,
+        mode: mode.value
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.detail || `Request failed (${response.status})`
+      );
+    }
+
+    result.textContent = data.result;
+  } catch (error) {
+    console.error("LinguaFlow API error:", error);
+    result.textContent =
+      "Could not connect to the backend. Make sure the FastAPI server is running at http://127.0.0.1:8000, then try again.";
+  } finally {
+    convertBtn.disabled = false;
+    convertBtn.textContent = "Convert message";
   }
-
-  result.textContent =
-    `DEMO ONLY: Your message would be ${modeDescription} here.\n\n` +
-    `Original message: ${text}\n\n` +
-    "Real AI conversion is not connected yet.";
 });
 
 copyBtn.addEventListener("click", async () => {
