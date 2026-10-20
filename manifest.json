@@ -1,0 +1,11 @@
+
+{
+  "manifest_version": 3,
+  "name": "LinguaFlow AI",
+  "version": "0.1.0",
+  "description": "Write in your language. Communicate with the world.",
+  "action": {
+    "default_title": "LinguaFlow AI",
+    "default_popup": "popup/popup.html"
+  }
+}
