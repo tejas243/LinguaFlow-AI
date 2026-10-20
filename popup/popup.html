@@ -34,6 +34,7 @@
         <label for="sourceText">Your message</label>
         <span id="charCount">0 characters</span>
       </div>
+
       <textarea
         id="sourceText"
         placeholder="Type in Marathi, Hinglish, or English..."
@@ -48,17 +49,21 @@
     <section class="result-section">
       <div class="section-heading">
         <h2>Result</h2>
-        <span class="demo-badge">DEMO MODE</span>
+        <span id="aiStatus" class="ai-badge">AI READY</span>
       </div>
 
-      <div id="result" class="result" aria-live="polite">
-        Your converted message will appear here.
-      </div>
+      <div
+        id="result"
+        class="result"
+        aria-live="polite"
+        aria-atomic="true"
+      >Your converted message will appear here.</div>
 
       <div class="result-actions">
         <button id="copyBtn" class="secondary-btn" type="button">
           Copy result
         </button>
+
         <button id="clearBtn" class="secondary-btn" type="button">
           Clear
         </button>

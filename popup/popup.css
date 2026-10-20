@@ -56,8 +56,7 @@ body {
   font-size: 10px;
 }
 
-.status,
-.demo-badge {
+.status {
   border-radius: 20px;
   background: #e8eaff;
   color: #4338ca;
@@ -138,7 +137,7 @@ textarea:focus {
   border: 0;
   border-radius: 11px;
   background: #4f46e5;
-  color: white;
+  color: #ffffff;
   font-size: 13px;
   font-weight: 650;
   cursor: pointer;
@@ -162,9 +161,24 @@ textarea:focus {
   margin-top: 20px;
 }
 
-.demo-badge {
-  background: #fff1d6;
-  color: #915b00;
+.ai-badge {
+  display: inline-block;
+  padding: 7px 12px;
+  border-radius: 20px;
+  background: #e8f8ee;
+  color: #167744;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+
+#aiStatus {
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+#aiStatus:where(:not(:empty)) {
+  letter-spacing: 0.2px;
 }
 
 .result {
