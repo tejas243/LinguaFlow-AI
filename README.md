@@ -16,6 +16,24 @@ LinguaFlow AI is a Chrome extension that helps users rewrite messages in differe
 - **AI status indicator** — Display the current conversion status.
 - **Multilingual input** — Designed for messages in English, Marathi, and Hinglish; output quality may vary by language.
 
+## Screenshots
+
+### Professional Mode
+Rewrite messages into a polite, professional tone.
+
+![LinguaFlow AI Professional Mode](screenshots/professional.png)
+
+### Casual Mode
+Make messages sound friendly and natural.
+
+![LinguaFlow AI Casual Mode](screenshots/casual.png)
+
+### Grammar Correction
+Correct grammar while preserving the original meaning.
+
+![LinguaFlow AI Grammar Correction](screenshots/Grammar-correction.png)
+
+
 ## Technology Stack
 
 | Component | Technology |
