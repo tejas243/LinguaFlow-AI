@@ -21,7 +21,6 @@ load_dotenv(Path(__file__).with_name(".env"))
 
 MODEL_NAME = "gemini-3.8-flash"
 
-# Your Chrome extension ID
 CHROME_EXTENSION_ORIGIN = (
     "chrome-extension://ealkgdjdgpamlcfbegibhbponbhimefce"
 )
@@ -33,12 +32,11 @@ CHROME_EXTENSION_ORIGIN = (
 app = FastAPI(
     title="LinguaFlow AI API",
     description="AI writing assistant backend for LinguaFlow AI.",
-    version="0.3.0",
+    version="0.4.0",
 )
 
 # --------------------------------------------------
 # CORS configuration
-# Allows requests from your Chrome extension.
 # --------------------------------------------------
 
 app.add_middleware(
@@ -98,37 +96,59 @@ def convert_message(request: ConvertRequest):
     if not api_key or api_key == "PASTE_YOUR_KEY_HERE":
         raise HTTPException(
             status_code=503,
-            detail="AI service is not configured. Check the GEMINI_API_KEY environment variable.",
+            detail=(
+                "AI service is not configured. "
+                "Check the GEMINI_API_KEY environment variable."
+            ),
         )
 
     instructions = {
         "professional": (
-            "Rewrite the message in a clear, polished, professional "
-            "style suitable for work or college communication."
+            "Translate the message into natural English and rewrite it "
+            "in a polished, respectful, professional style suitable "
+            "for work or college communication."
         ),
         "casual": (
-            "Rewrite the message in a friendly, natural, casual style."
+            "Translate the message into natural, friendly English. "
+            "Make it sound casual, conversational, and human."
         ),
         "grammar": (
-            "Correct grammar, spelling, and punctuation while preserving "
-            "the original tone and meaning."
+            "Translate the message into English and correct grammar, "
+            "spelling, and punctuation. Keep the meaning and intended "
+            "tone as close to the original as possible."
         ),
     }
 
     prompt = f"""
-You are LinguaFlow AI, a multilingual writing assistant.
+You are LinguaFlow AI, a multilingual writing and translation assistant.
 
-Task: {instructions[request.mode]}
+TASK:
+{instructions[request.mode]}
 
-Rules:
-- Preserve the original meaning and intent.
-- Understand the language the user writes in.
-- Keep the output in the same language as the input.
-- Preserve names, facts, and important details.
-- Return only the rewritten message, without explanations,
-  headings, quotation marks, or commentary.
+MANDATORY LANGUAGE RULES:
+- The final output MUST ALWAYS be in English.
+- The input may be Marathi, Hindi, Hinglish, English, or any other language.
+- Understand the complete meaning of the input before translating.
+- If the input mixes languages, express its complete meaning in natural English.
+- Never return Marathi, Hindi, Hinglish, or another non-English language.
+- Do not merely transliterate non-English words into English letters.
+- Use correct, natural English rather than a word-for-word translation.
 
-Message:
+STYLE RULES:
+- Professional: polite, clear, polished, and professional English.
+- Casual: friendly, natural, conversational English.
+- Grammar: accurate English with corrected grammar, spelling, and punctuation.
+
+CONTENT RULES:
+- Preserve the original meaning, intent, names, facts, and important details.
+- Do not invent details or change the user's intended message.
+- If the input is already in English, apply the selected writing style.
+- Return ONLY the final English message.
+- Do not include explanations, headings, labels, or quotation marks.
+
+User's selected mode: {request.mode}
+
+Message to convert:
 {text}
 """
 
@@ -145,7 +165,10 @@ Message:
         if not result:
             raise HTTPException(
                 status_code=502,
-                detail="The AI returned an empty response. Please try again.",
+                detail=(
+                    "The AI returned an empty response. "
+                    "Please try again."
+                ),
             )
 
         return ConvertResponse(
