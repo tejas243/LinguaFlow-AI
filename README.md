@@ -114,7 +114,7 @@ pip install -r requirements.txt
 Create a file named `.env` inside `backend/`:
 
 ```env
-GEMINI_API_KEY=your_gemini_api_key
+GEMINI_API_KEY=YOUR_GEMINI_API_KEY_HERE
 ```
 
 Replace the placeholder with your own API key. Never commit or share this secret.
