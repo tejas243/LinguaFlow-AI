@@ -1,57 +1,60 @@
-
 # LinguaFlow AI
 
 **Write naturally. Communicate globally.**
 
-LinguaFlow AI is a Chrome extension that helps users rewrite messages in different writing styles. It uses a Chrome extension frontend, a FastAPI backend, and Google's Gemini API to transform text while preserving the original meaning.
+LinguaFlow AI is an AI-powered Chrome extension that helps users rewrite messages in different writing styles. Built with HTML, CSS, JavaScript, FastAPI, and Google's Gemini API, it transforms text while aiming to preserve the original meaning and intent.
 
 ## Features
 
-- **Professional mode** — Rewrite messages in a polished, professional tone.
-- **Casual mode** — Make messages sound friendly and natural.
-- **Grammar correction** — Correct grammar, spelling, and punctuation.
-- **Character counter** — Track the length of your message.
-- **Copy result** — Copy the generated text.
-- **Clear input** — Reset the message and result.
-- **AI status indicator** — Display the current conversion status.
-- **Multilingual input** — Designed for messages in English, Marathi, and Hinglish; output quality may vary by language.
+- **Professional Mode** — Rewrite messages in a polished, professional tone.
+- **Casual Mode** — Make messages sound friendly and natural.
+- **Grammar Correction** — Correct grammar, spelling, and punctuation.
+- **Character Counter** — Track message length while typing.
+- **Copy Result** — Copy the generated message.
+- **Clear Input** — Clear the message and result.
+- **AI Status Indicator** — Display conversion status in the extension.
+- **Multilingual Input** — Designed for English, Marathi, and Hinglish input. Output quality may vary by language.
 
 ## Screenshots
 
 ### Professional Mode
+
 Rewrite messages into a polite, professional tone.
 
 ![LinguaFlow AI Professional Mode](screenshots/professional.png)
 
 ### Casual Mode
+
 Make messages sound friendly and natural.
 
 ![LinguaFlow AI Casual Mode](screenshots/casual.png)
 
 ### Grammar Correction
+
 Correct grammar while preserving the original meaning.
 
 ![LinguaFlow AI Grammar Correction](screenshots/Grammar-correction.png)
-
 
 ## Technology Stack
 
 | Component | Technology |
 |---|---|
-| Browser extension | Chrome Extension Manifest V3 |
+| Browser Extension | Chrome Extension Manifest V3 |
 | Frontend | HTML, CSS, JavaScript |
 | Backend | Python, FastAPI |
-| AI integration | Google Gemini API |
-| API server | Uvicorn |
-| Version control | Git and GitHub |
+| AI Integration | Google Gemini API |
+| API Server | Uvicorn |
+| Configuration | Environment variables and `python-dotenv` |
+| Version Control | Git and GitHub |
+| Backend Hosting | Render |
 
 ## Architecture
 
-1. The user enters a message in the Chrome extension.
-2. The extension sends the message and selected writing mode to the FastAPI backend.
-3. The backend builds instructions for the selected mode.
+1. The user enters a message and selects a writing mode in the Chrome extension.
+2. The extension sends the message and selected mode to the FastAPI backend.
+3. The backend validates the input and constructs instructions for the selected mode.
 4. The backend sends the request to the Gemini API.
-5. The generated response is returned to the extension and displayed to the user.
+5. The generated text is returned to the extension and displayed to the user.
 
 ## Project Structure
 
@@ -60,88 +63,95 @@ LinguaFlow-AI/
 ├── backend/
 │   ├── main.py
 │   ├── requirements.txt
-│   └── .env
+│   └── .env                 # Local secret; not committed
 ├── popup/
 │   ├── popup.html
 │   ├── popup.css
 │   └── popup.js
+├── screenshots/
+│   ├── professional.png
+│   ├── casual.png
+│   └── Grammar-correction.png
 ├── manifest.json
 ├── .gitignore
+├── LICENSE
 └── README.md
 ```
 
-The `.env` file is local configuration and must not be committed. It should be created locally during setup.
+The `.env` file must be created locally and must never contain a key that is committed to the repository.
 
 ## Getting Started
 
 ### Prerequisites
 
 - Google Chrome
-- Python 3.10 or later, compatible with the installed dependencies
-- A Gemini API key
+- Python compatible with the project's dependencies
+- A Google Gemini API key
 - Git
 
-### 1. Clone the repository
+### 1. Clone the Repository
 
 ```bash
-git clone <YOUR_GITHUB_REPOSITORY_URL>
+git clone https://github.com/tejas243/LinguaFlow-AI.git
 cd LinguaFlow-AI
 ```
 
-Replace the placeholder URL with your repository URL.
-
-### 2. Set up the backend
+### 2. Set Up the Backend
 
 ```bash
 cd backend
 python -m venv .venv
 ```
 
-Activate the virtual environment on Windows:
+Activate the virtual environment on Windows PowerShell:
 
 ```powershell
 .venv\Scripts\Activate.ps1
 ```
 
-Install dependencies:
+Install the dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Configure the Gemini API key
+### 3. Configure the Gemini API Key
 
-Create a file named `.env` inside `backend/`:
+Create a file named `.env` inside the `backend/` directory:
 
 ```env
 GEMINI_API_KEY=YOUR_GEMINI_API_KEY_HERE
 ```
 
-Replace the placeholder with your own API key. Never commit or share this secret.
+Replace the placeholder with your own Gemini API key. Never commit or share the actual key.
 
-### 4. Start the backend
+For the deployed service, configure `GEMINI_API_KEY` in the Render dashboard's environment settings.
 
-From the `backend` directory, run:
+### 4. Start the Local Backend
+
+From the `backend/` directory, run:
 
 ```bash
 python -m uvicorn main:app --reload
 ```
 
-The API should be available at:
+The local API will be available at:
 
-- API root: `http://127.0.0.1:8000/`
-- Health check: `http://127.0.0.1:8000/health`
-- Interactive API documentation: `http://127.0.0.1:8000/docs`
+- **API root:** http://127.0.0.1:8000/
+- **Health check:** http://127.0.0.1:8000/health
+- **Interactive API documentation:** http://127.0.0.1:8000/docs
 
-Keep the backend running while using the local extension.
+Keep the backend running while using the extension with the local API.
 
-### 5. Load the Chrome extension
+### 5. Load the Chrome Extension
 
 1. Open `chrome://extensions` in Chrome.
 2. Enable **Developer mode**.
 3. Click **Load unpacked**.
-4. Select the project root folder containing `manifest.json`.
-5. Open the LinguaFlow AI extension and test a message.
+4. Select the project root directory containing `manifest.json`.
+5. Open LinguaFlow AI and test the available writing modes.
+
+**Note:** The extension's configured API URL and the backend's CORS settings must match the environment you are using. The deployed version uses the Render backend, while local development can use the local API.
 
 ## API Endpoint
 
@@ -166,23 +176,25 @@ A successful response contains the status, selected mode, and generated result.
 
 ## Security Notes
 
-- Keep your Gemini API key in `backend/.env`.
+- Keep the Gemini API key in `backend/.env` for local development.
 - Never commit `.env`, virtual environments, or other secrets.
-- Restrict API usage and protect the backend before public deployment.
-- The local development setup uses `127.0.0.1`; it is not a public production service.
+- Configure production secrets through the hosting provider's environment settings.
+- Protect the public API against abuse with appropriate rate limiting and usage controls.
+- Do not expose the Gemini API key in extension JavaScript or other client-side files.
 
 ## Current Status
 
-The local prototype has been tested with all three writing modes using the Gemini-backed API.
+The Chrome extension, Gemini-backed FastAPI integration, and Render deployment have been tested. All three writing modes have been manually tested successfully.
 
 ## Future Improvements
 
+- Add automated tests for the API and extension workflows.
 - Improve multilingual output consistency.
-- Add automated tests and stronger input validation.
-- Add request limits and production-grade error handling.
-- Deploy the backend securely.
-- Add screenshots, a demo, and installation guidance for end users.
+- Add rate limiting and production-grade monitoring.
+- Improve error handling and API reliability.
+- Explore a Chrome Web Store release.
+- Add additional language support and writing styles.
 
 ## License
 
-A license has not yet been selected. Add a license before granting public reuse rights.
+This project includes an MIT license file. See [`LICENSE`](LICENSE) for the applicable terms.
