@@ -1,17 +1,33 @@
-from fastapi.middleware.cors import CORSMiddleware
+
+import logging
+import os
+from pathlib import Path
 from typing import Literal
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+from google import genai
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("linguaflow")
+
+load_dotenv(Path(__file__).with_name(".env"))
+
+MODEL_NAME = "gemini-3.8-flash"
 
 app = FastAPI(
     title="LinguaFlow AI API",
-    description="Backend API for the LinguaFlow AI Chrome extension.",
-    version="0.1.0",
+    description="AI writing assistant backend for LinguaFlow AI.",
+    version="0.2.0",
 )
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["chrome-extension://ealkgdjdgpamlcfbegibhbponbhimefce"],
+    allow_origins=[
+        "chrome-extension://ealkgdjdgpamlcfbegibhbponbhimefce"
+    ],
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],
 )
@@ -54,21 +70,74 @@ def convert_message(request: ConvertRequest):
             detail="Message cannot contain only whitespace.",
         )
 
-    mode_descriptions = {
-        "professional": "rewritten professionally",
-        "casual": "rewritten in a friendly, casual style",
-        "grammar": "checked and corrected for grammar",
+    api_key = os.getenv("GEMINI_API_KEY")
+
+    if not api_key or api_key == "PASTE_YOUR_KEY_HERE":
+        raise HTTPException(
+            status_code=503,
+            detail="AI service is not configured. Check backend/.env.",
+        )
+
+    instructions = {
+        "professional": (
+            "Rewrite the message in a clear, polished, professional "
+            "style suitable for work or college communication."
+        ),
+        "casual": (
+            "Rewrite the message in a friendly, natural, casual style."
+        ),
+        "grammar": (
+            "Correct grammar, spelling, and punctuation while preserving "
+            "the original tone and meaning."
+        ),
     }
 
-    result = (
-        f"DEMO ONLY: Your message would be "
-        f"{mode_descriptions[request.mode]} here.\n\n"
-        f"Original message: {text}\n\n"
-        "Real AI conversion is not connected yet."
-    )
+    prompt = f"""
+You are LinguaFlow AI, a multilingual writing assistant.
 
-    return ConvertResponse(
-        status="demo",
-        mode=request.mode,
-        result=result,
-    )
+Task: {instructions[request.mode]}
+
+Rules:
+- Preserve the original meaning and intent.
+- Understand the language the user writes in.
+- Keep the output in the same language as the input.
+- Preserve names, facts, and important details.
+- Return only the rewritten message, without explanations,
+  headings, quotation marks, or commentary.
+
+Message:
+{text}
+"""
+
+    try:
+        client = genai.Client(api_key=api_key)
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=prompt,
+        )
+
+        result = (response.text or "").strip()
+
+        if not result:
+            raise HTTPException(
+                status_code=502,
+                detail="The AI returned an empty response. Please try again.",
+            )
+
+        return ConvertResponse(
+            status="success",
+            mode=request.mode,
+            result=result,
+        )
+
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Gemini conversion request failed")
+        raise HTTPException(
+            status_code=502,
+            detail=(
+                "AI conversion failed. Check the backend terminal "
+                "for details and try again."
+            ),
+        )
